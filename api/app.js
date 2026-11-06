@@ -4,7 +4,7 @@ import * as ai from "../lib/ai.js";
 import { isAuthed, logIn, logOutCookie, httpError } from "../lib/auth.js";
 import { DEFAULT_SETTINGS, applyEvaluation, buildRound, history, mix, newId, roundStats } from "../lib/interview.js";
 
-const DOC_KEYS = ["resume", "cover", "jd", "exp"];
+const DOC_KEYS = ["resume", "cover", "jd"];
 const MAX_DOC = 80_000; // 글자. 문서 하나가 이보다 길면 거절
 const MAX_ANSWER = 8_000;
 

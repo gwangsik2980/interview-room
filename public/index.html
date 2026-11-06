@@ -253,7 +253,7 @@ dialog::backdrop{background:rgba(0,0,0,.6)}
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const mmss = (s) => `${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}`;
-const DOCS = [["resume","이력서"],["cover","자소서"],["jd","직무기술서"],["exp","경험 정리"]];
+const DOCS = [["resume","이력서"],["cover","자소서"],["jd","직무기술서"]];
 const store = { get(k, d) { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } }, set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} } };
 
 async function api(action, body = {}) {
@@ -340,7 +340,7 @@ function fillSetup(c) {
       <label for="d_${k}">${label} <span class="meta" id="c_${k}"></span>
         <input type="file" accept=".txt,.md,text/plain,text/markdown" id="f_${k}" class="hidden">
         <button type="button" class="btn ghost sm" onclick="document.getElementById('f_${k}').click()">텍스트 파일 올리기</button></label>
-      <textarea id="d_${k}" placeholder="${label} 내용을 붙여넣으세요${k === "exp" ? " (면접관이 답변의 숫자·기간·역할을 이 자료와 맞춰 봅니다)" : ""}"></textarea>
+      <textarea id="d_${k}" placeholder="${label} 내용을 붙여넣으세요"></textarea>
     </div>`).join("");
   for (const [k] of DOCS) {
     const ta = $(`d_${k}`), count = () => ($(`c_${k}`).textContent = ta.value ? `${ta.value.length.toLocaleString()}자` : "");
@@ -507,7 +507,7 @@ async function toggleRetry(roundId, itemId, value) {
 function render() { renderDocs(); renderMain(); renderLog(); }
 
 function renderDocs() {
-  $("docTabs").innerHTML = DOCS.slice(0, 3).map(([k, l]) => `<button class="${S.docTab === k ? "on" : ""}" data-k="${k}">${l}</button>`).join("");
+  $("docTabs").innerHTML = DOCS.map(([k, l]) => `<button class="${S.docTab === k ? "on" : ""}" data-k="${k}">${l}</button>`).join("");
   $("docTabs").querySelectorAll("button").forEach((b) => (b.onclick = () => { S.docTab = b.dataset.k; store.set("ir_docTab", S.docTab); renderDocs(); }));
   const t = S.company?.docs?.[S.docTab];
   $("docBody").innerHTML = t?.trim() ? esc(t) : `<p class="meta">아직 넣은 자료가 없어요. 위의 '자료 설정'에서 붙여넣어 주세요.</p>`;
@@ -519,7 +519,7 @@ function setStatus(msg) { const s = $("status"); if (s) s.innerHTML = `${esc(msg
 
 function renderMain() {
   const m = $("main");
-  if (!S.company) { m.innerHTML = `<div class="empty"><h2>회사 자료부터 넣어 주세요</h2><p>이력서·자소서·직무기술서·경험 정리를 붙여넣으면 면접관이 그 자료로 질문합니다.</p><p style="margin-top:16px"><button class="btn white" onclick="openSetup()">자료 설정</button></p></div>`; return; }
+  if (!S.company) { m.innerHTML = `<div class="empty"><h2>회사 자료부터 넣어 주세요</h2><p>이력서·자소서·직무기술서를 붙여넣으면 면접관이 그 자료로 질문합니다.</p><p style="margin-top:16px"><button class="btn white" onclick="openSetup()">자료 설정</button></p></div>`; return; }
   if (S.view === "loading") { m.innerHTML = `<div class="loading">면접관이 이번 회차 질문을 준비하고 있습니다<span class="dots"></span><p class="meta" style="margin-top:8px">지난 질문과 겹치지 않게 고르는 중이라 20~40초 걸릴 수 있어요.</p></div>`; return; }
   if (S.view === "evaluating") { m.innerHTML = `<div class="loading">회차 전체를 평가하고 있습니다<span class="dots"></span><p class="meta" style="margin-top:8px">질문별 평가라 30초~1분쯤 걸려요.</p></div>`; return; }
   if (S.view === "result" && S.viewRound) { m.innerHTML = resultHtml(S.viewRound); bindResult(); return; }
