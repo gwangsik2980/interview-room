@@ -58,11 +58,12 @@ header select{width:auto;max-width:220px;padding:6px 10px;font-size:14px}
 .app{display:grid;grid-template-columns:minmax(250px,1fr) minmax(400px,1.45fr) minmax(250px,1fr);height:calc(100dvh - 58px)}
 .pane{min-width:0;min-height:0;display:flex;flex-direction:column;border-right:1px solid var(--line)}
 .pane:last-child{border-right:0}
-.pane-head{padding:14px 18px 10px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.pane-head{padding:18px 18px 10px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .pane-body{flex:1;min-height:0;overflow-y:auto;padding:4px 18px 18px}
 @media (max-width:900px){
   .app{grid-template-columns:1fr;height:auto;min-height:calc(100dvh - 58px)}
   #docsPane,#logPane{display:none}
+  #mainPane .pane-body{overflow:visible}
   header{flex-wrap:wrap;height:auto;padding:10px 16px}
   .pane-body{padding:4px 16px 16px}
 }
@@ -78,14 +79,27 @@ header select{width:auto;max-width:220px;padding:6px 10px;font-size:14px}
 .progress{display:flex;align-items:center;gap:10px;margin:6px 0 14px}
 .bar{flex:1;height:3px;background:var(--line-hi);position:relative;border-radius:2px;overflow:hidden}
 .bar i{position:absolute;inset:0 auto 0 0;background:var(--white);transition:width .4s var(--spring)}
-.bubble{display:flex;gap:12px;align-items:flex-start;margin-bottom:12px}
-.avatar{width:36px;height:36px;flex:none;border-radius:50%;border:1px solid var(--line-hi);display:grid;place-items:center;background:var(--panel)}
-.say{padding:14px 16px;font-size:17px;line-height:1.65;color:#fff;flex:1}
-.say .eng{display:block;margin-bottom:6px}
-.say-actions{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
-.answer{margin-top:16px;padding:16px}
-.answer textarea{min-height:150px;font-size:16px}
-.mic-row{display:flex;align-items:center;gap:14px;margin-bottom:12px}
+/* 대화형: 질문·답이 말풍선으로 쌓이고 아래에 입력줄 (English Quest 대화 화면 구조) */
+#mainPane .pane-body{display:flex;flex-direction:column;padding-bottom:0}
+#mainPane .center{flex:1;display:flex;flex-direction:column}
+.progress{position:sticky;top:-4px;z-index:2;background:var(--char);padding-top:10px}
+.thread{flex:1;display:flex;flex-direction:column;gap:14px;padding:4px 0 18px}
+.thread .ix{text-align:center;font:800 11px/1 var(--display);font-stretch:118%;letter-spacing:.18em;color:var(--mute);margin:6px 0}
+.msg{max-width:82%;padding:12px 15px;border-radius:var(--r);font-size:15.5px;line-height:1.65;white-space:pre-wrap}
+.msg.q{align-self:flex-start;background:var(--card-bg);border:1px solid var(--card-line);color:#fff}
+.msg.q .eng{display:block;margin-bottom:4px;font-size:10px}
+.msg.q.now{font-size:19px;font-weight:600;letter-spacing:-.02em;border-color:rgba(255,255,255,.3)}
+.msg.a{align-self:flex-end;background:var(--white);color:var(--ink)}
+.msg .t{display:block;margin-top:6px;font:700 11px/1 var(--display);opacity:.55}
+.say-actions{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;white-space:normal}
+.dock{position:sticky;bottom:0;z-index:2;background:var(--char);border-top:1px solid var(--line);padding:10px 0 16px}
+.dock-hint{display:flex;gap:12px;justify-content:space-between;font-size:12.5px;color:var(--sub);margin-bottom:8px}
+.dock-row{display:flex;align-items:flex-end;gap:10px}
+.dock textarea{flex:1;min-height:52px;max-height:200px;font-size:15px}
+.dock .mic{width:52px;height:52px}
+.dock .timer{font-size:18px;min-width:52px;text-align:center;padding-bottom:14px}
+.dock-btns{display:flex;flex-direction:column;gap:6px}
+@media (max-width:600px){.dock-row{flex-wrap:wrap}.dock textarea{flex-basis:100%;order:-1}.dock-btns{flex-direction:row;margin-left:auto}.msg{max-width:92%}}
 .mic{width:64px;height:64px;border-radius:50%;background:var(--white);color:var(--ink);display:grid;place-items:center;flex:none;transition:transform .15s}
 .mic:hover{transform:translateY(-2px)}
 .mic.on{background:var(--ink);color:var(--white);border:2px solid var(--white);animation:pulse 1.4s infinite}
@@ -125,6 +139,8 @@ ul.plain li::before{content:"";position:absolute;left:0;top:.8em;width:6px;heigh
 .qlist li.done{color:#d0d0cc}
 .qlist li.cur{color:#fff;font-weight:600}
 .qlist li .q{flex:1;min-width:0}
+.qlist li .chip{align-self:flex-start;flex:none;padding:0 7px;font-size:11.5px}
+.sec h4::before,.pane-head .eng::before{content:"";display:block;width:28px;height:3px;background:var(--white);margin-bottom:8px}
 .round{width:100%;text-align:left;padding:10px 12px;margin-bottom:8px;display:block}
 .round:hover{background:rgba(255,255,255,.04)}
 .round b{color:#fff}
@@ -509,25 +525,29 @@ function renderMain() {
 function interviewHtml() {
   const it = current(), total = S.round.items.length, fu = S.part === "followUp";
   const answered = S.round.items.filter((x) => x.answer.trim()).length;
+  const qMsg = (label, q, now) => `<div class="msg q${now ? " now" : ""}"><span class="eng">${esc(label)}</span>${esc(q)}${now ? sayActions(q) : ""}</div>`;
+  const aMsg = (a, secs) => `<div class="msg a">${esc(a)}<span class="t num">${mmss(secs)}</span></div>`;
+  const thread = S.round.items.slice(0, S.idx + 1).map((x, i) => {
+    const cur = i === S.idx;
+    let h = `<div class="ix">Q ${i + 1} / ${total} · ${esc(x.type)}${x.rephraseOf ? " · 다시 묻는 질문" : ""}</div>` + qMsg(x.type, x.q, cur && !fu);
+    if (!cur || fu) h += aMsg(x.answer, x.seconds);
+    if (x.followUp?.q) h += qMsg("꼬리질문", x.followUp.q, cur && fu) + (cur ? "" : x.followUp.answer ? aMsg(x.followUp.answer, x.followUp.seconds) : "");
+    return h;
+  }).join("");
   return `
     <div class="progress"><span class="eng num">Q ${S.idx + 1} / ${total}</span><div class="bar"><i style="width:${(answered / total) * 100}%"></i></div>
       <button class="btn ghost sm" id="finishBtn" title="지금까지 답한 질문만 평가합니다">끝내기</button></div>
-    <div class="bubble">
-      <div class="avatar"><svg width="18" height="18"><use href="#emb"/></svg></div>
-      <div class="say glass"><span class="eng">${esc(it.type)}${it.rephraseOf ? " · 다시 묻는 질문" : ""}</span>${esc(it.q)}
-        ${fu ? "" : sayActions(it.q)}</div>
-    </div>
-    ${fu ? `<div class="bubble"><div class="avatar"><svg width="18" height="18"><use href="#emb"/></svg></div><div class="say glass"><span class="eng">꼬리질문</span>${esc(it.followUp.q)}${sayActions(it.followUp.q)}</div></div>` : ""}
-    <div class="answer glass">
-      <div class="mic-row">
+    <div class="thread">${thread}</div>
+    <div class="dock">
+      <div class="dock-hint"><span id="micHint"></span><span id="status"></span></div>
+      <div class="dock-row">
         <button class="mic" id="micBtn" aria-label="답변 시작"></button>
-        <div><div class="timer num" id="timer">0:00</div><div class="meta" id="micHint"></div></div>
-      </div>
-      <textarea id="ans" placeholder="마이크를 누르고 말하면 여기에 적힙니다. 글로 고쳐도 됩니다.">${esc(fu ? it.followUp.answer : it.answer)}</textarea>
-      <div class="row end" style="margin-top:12px">
-        <span class="meta" id="status" style="margin-right:auto"></span>
-        <button class="btn ghost" id="retryBtn">다시 답하기</button>
-        <button class="btn white" id="submitBtn">${S.idx === total - 1 ? "제출하고 끝내기" : "제출하고 다음"}</button>
+        <textarea id="ans" rows="2" placeholder="마이크를 누르고 말하면 여기에 적힙니다. 글로 고쳐도 됩니다.">${esc(fu ? it.followUp.answer : it.answer)}</textarea>
+        <div class="timer num" id="timer">0:00</div>
+        <div class="dock-btns">
+          <button class="btn white" id="submitBtn">${S.idx === total - 1 ? "제출하고 끝내기" : "제출"}</button>
+          <button class="btn ghost sm" id="retryBtn">다시 답하기</button>
+        </div>
       </div>
       ${errBox()}
     </div>`;
@@ -545,6 +565,7 @@ function bindInterview() {
   document.querySelectorAll("[data-tts]").forEach((b) => (b.onclick = () => { S.tts = !S.tts; store.set("ir_tts", S.tts); if (!S.tts) hush(); renderMain(); }));
   if (!rec.on && !rec.acc) rec.acc = S.part === "followUp" ? it.followUp.seconds : it.seconds;
   renderMic(); renderTimer();
+  const body = $("main").closest(".pane-body"); body.scrollTop = body.scrollHeight; scrollTo(0, document.body.scrollHeight);
 }
 const MIC = `<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>`;
 const STOP = `<svg width="22" height="22" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2" fill="currentColor"/></svg>`;
