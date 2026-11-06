@@ -1,0 +1,15 @@
+{
+  "name": "interview-room",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node --env-file-if-exists=.env dev.js",
+    "test": "node --test test/*.test.js"
+  },
+  "engines": { "node": ">=20" },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^1.6.0",
+    "@neondatabase/serverless": "^1.2.0"
+  }
+}

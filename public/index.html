@@ -1,0 +1,631 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>GWANG 면접실</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@112..125,500..900&display=swap">
+<style>
+/* GWANG 디자인(DESIGN.md · 취업본부 app.css): 무채색, 흰 단색 강조, 카드 12px · 버튼 8px */
+:root{
+  --char:#151515;--char-2:#1d1d1d;--panel:#242424;--ink:#121212;
+  --text:#f2f2f0;--sub:#b4b4b0;--mute:#808080;--line:#2f2f2f;--line-hi:#3d3d3d;--white:#f2f2f0;
+  --noise:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .6 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  --display:"Archivo","Pretendard",sans-serif;
+  --r:12px;--r-sm:8px;--r-xs:6px;
+  --card-bg:linear-gradient(160deg,rgba(255,255,255,.055),rgba(255,255,255,0) 45%),#202020;
+  --card-line:rgba(255,255,255,.1);
+  --spring:cubic-bezier(.22,1,.36,1);
+}
+*{box-sizing:border-box;margin:0;padding:0;scrollbar-width:thin;scrollbar-color:#3a3a3a transparent}
+html,body{height:100%}
+body{background:var(--char);color:var(--text);font-family:Pretendard,-apple-system,"Malgun Gothic",sans-serif;font-size:15px;line-height:1.6;letter-spacing:-.01em;word-break:keep-all;overflow-wrap:anywhere;-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:50;background-image:var(--noise);opacity:.08;mix-blend-mode:overlay}
+button,input,textarea,select{font:inherit;color:inherit}
+button{background:none;border:0;cursor:pointer}
+button:disabled{opacity:.4;cursor:default;transform:none!important}
+.hidden{display:none!important}
+.eng{font-family:var(--display);font-stretch:118%;font-weight:800;text-transform:uppercase;letter-spacing:.18em;font-size:11px;color:var(--sub)}
+.meta{color:var(--sub);font-size:13px}
+.num{font-variant-numeric:tabular-nums}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 18px;font-size:14px;font-weight:700;border-radius:var(--r-sm);transition:transform .15s,background .2s;white-space:nowrap}
+.btn:hover{transform:translateY(-2px)}
+.btn.white{background:var(--white);color:var(--ink);border:1px solid var(--white)}
+.btn.white:hover{background:#fff}
+.btn.ghost{border:1px solid rgba(255,255,255,.14);color:var(--sub)}
+.btn.ghost:hover{color:var(--text);background:rgba(255,255,255,.05)}
+.btn.sm{padding:6px 12px;font-size:13px}
+.chip{display:inline-block;font-size:12px;padding:1px 8px;border-radius:var(--r-xs);border:1px solid var(--line-hi);color:var(--sub);background:var(--panel);white-space:nowrap}
+.chip.on{background:var(--white);color:var(--ink);border-color:var(--white);font-weight:600}
+.glass{background:var(--card-bg);border:1px solid var(--card-line);border-radius:var(--r);box-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 8px 24px rgba(0,0,0,.28)}
+input[type=text],input[type=password],textarea,select{background:#1a1a1a;border:1px solid var(--line-hi);border-radius:var(--r-sm);padding:9px 12px;width:100%;font-size:16px}
+textarea{resize:vertical;line-height:1.6}
+input:focus,textarea:focus,select:focus{outline:1px solid rgba(255,255,255,.5);outline-offset:0}
+:focus-visible{outline:2px solid rgba(255,255,255,.7);outline-offset:2px}
+
+/* 머리줄 */
+header{height:58px;display:flex;align-items:center;gap:14px;padding:0 18px;border-bottom:1px solid var(--line);background:rgba(21,21,21,.86)}
+.brand{display:flex;align-items:center;gap:10px}
+.wm{font-family:var(--display);font-stretch:112%;font-weight:900;font-size:19px;letter-spacing:.04em;line-height:1}
+.wm small{display:block;font-size:10px;letter-spacing:.24em;color:var(--mute);font-weight:700;margin-top:2px}
+header .grow{flex:1}
+header select{width:auto;max-width:220px;padding:6px 10px;font-size:14px}
+
+/* 3분할 */
+.app{display:grid;grid-template-columns:minmax(250px,1fr) minmax(400px,1.45fr) minmax(250px,1fr);height:calc(100dvh - 58px)}
+.pane{min-width:0;min-height:0;display:flex;flex-direction:column;border-right:1px solid var(--line)}
+.pane:last-child{border-right:0}
+.pane-head{padding:14px 18px 10px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.pane-body{flex:1;min-height:0;overflow-y:auto;padding:4px 18px 18px}
+@media (max-width:900px){
+  .app{grid-template-columns:1fr;height:auto;min-height:calc(100dvh - 58px)}
+  #docsPane,#logPane{display:none}
+  header{flex-wrap:wrap;height:auto;padding:10px 16px}
+  .pane-body{padding:4px 16px 16px}
+}
+
+/* 자료 */
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+.tabs button{padding:5px 12px;font-size:13px;border:1px solid var(--line-hi);border-radius:var(--r-sm);color:var(--sub)}
+.tabs button.on{background:var(--white);color:var(--ink);border-color:var(--white);font-weight:600}
+.doc{white-space:pre-wrap;font-size:14px;color:#d0d0cc;line-height:1.75}
+
+/* 면접 */
+.center{max-width:720px;width:100%;margin:0 auto}
+.progress{display:flex;align-items:center;gap:10px;margin:6px 0 14px}
+.bar{flex:1;height:3px;background:var(--line-hi);position:relative;border-radius:2px;overflow:hidden}
+.bar i{position:absolute;inset:0 auto 0 0;background:var(--white);transition:width .4s var(--spring)}
+.bubble{display:flex;gap:12px;align-items:flex-start;margin-bottom:12px}
+.avatar{width:36px;height:36px;flex:none;border-radius:50%;border:1px solid var(--line-hi);display:grid;place-items:center;background:var(--panel)}
+.say{padding:14px 16px;font-size:17px;line-height:1.65;color:#fff;flex:1}
+.say .eng{display:block;margin-bottom:6px}
+.say-actions{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+.answer{margin-top:16px;padding:16px}
+.answer textarea{min-height:150px;font-size:16px}
+.mic-row{display:flex;align-items:center;gap:14px;margin-bottom:12px}
+.mic{width:64px;height:64px;border-radius:50%;background:var(--white);color:var(--ink);display:grid;place-items:center;flex:none;transition:transform .15s}
+.mic:hover{transform:translateY(-2px)}
+.mic.on{background:var(--ink);color:var(--white);border:2px solid var(--white);animation:pulse 1.4s infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 6px rgba(242,242,240,.12)}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+.timer{font-family:var(--display);font-stretch:118%;font-weight:800;font-size:28px;letter-spacing:.02em}
+.timer.over{text-decoration:underline;text-underline-offset:6px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.row.end{justify-content:flex-end}
+.err{margin-top:10px;padding:10px 12px;border:1px solid var(--line-hi);border-left:3px solid var(--white);border-radius:var(--r-sm);font-size:14px;background:#1b1b1b}
+.empty{padding:40px 8px;text-align:center;color:var(--sub)}
+.empty h2{color:#fff;font-size:22px;margin-bottom:8px}
+.loading{padding:60px 8px;text-align:center;color:var(--sub)}
+.dots::after{content:"";animation:dots 1.2s steps(4) infinite}
+@keyframes dots{0%{content:""}25%{content:"."}50%{content:".."}75%{content:"..."}}
+
+/* 평가 카드 */
+.ev{padding:16px;margin-bottom:12px}
+.ev h3{font-size:16px;color:#fff;margin:6px 0 10px;line-height:1.5}
+.ev dl{display:grid;grid-template-columns:88px 1fr;gap:6px 12px;font-size:14px}
+.ev dt{color:var(--sub)}
+.ev dd{color:#e4e4e1}
+.ev details{margin-top:10px;font-size:14px;color:#d0d0cc}
+.ev summary{cursor:pointer;color:var(--sub)}
+.ev .tip{margin-top:10px;padding:10px 12px;border-left:3px solid #cfcfcc;background:rgba(255,255,255,.04);font-size:14px}
+ul.plain{list-style:none}
+ul.plain li{position:relative;padding-left:14px}
+ul.plain li::before{content:"";position:absolute;left:0;top:.8em;width:6px;height:1px;background:var(--sub)}
+
+/* 기록 */
+.sec{margin-bottom:22px}
+.sec h4{margin-bottom:8px}
+.qlist{list-style:none;counter-reset:q}
+.qlist li{display:flex;gap:8px;padding:7px 0;border-top:1px solid var(--line);font-size:13.5px;color:var(--sub);line-height:1.5}
+.qlist li:first-child{border-top-color:var(--line-hi)}
+.qlist li .n{font-family:var(--display);font-stretch:125%;font-weight:800;font-size:11px;color:var(--mute);width:18px;flex:none;padding-top:2px}
+.qlist li.done{color:#d0d0cc}
+.qlist li.cur{color:#fff;font-weight:600}
+.qlist li .q{flex:1;min-width:0}
+.round{width:100%;text-align:left;padding:10px 12px;margin-bottom:8px;display:block}
+.round:hover{background:rgba(255,255,255,.04)}
+.round b{color:#fff}
+.stats{display:flex;gap:10px;flex-wrap:wrap;font-size:12.5px;color:var(--sub);margin-top:4px}
+.delta{color:#fff}
+.typebar{display:grid;grid-template-columns:72px 1fr 22px;gap:8px;align-items:center;font-size:13px;margin-bottom:6px;color:var(--sub)}
+.typebar .bar{height:6px}
+
+/* 모달 */
+dialog{margin:auto;width:min(860px,calc(100vw - 32px));max-height:calc(100dvh - 32px);background:var(--char-2);color:var(--text);border:1px solid var(--line-hi);border-radius:var(--r);padding:0}
+dialog::backdrop{background:rgba(0,0,0,.6)}
+.dlg-head{position:sticky;top:0;background:var(--char-2);padding:16px 20px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px;z-index:1}
+.dlg-head h2{font-size:18px;flex:1}
+.dlg-body{padding:16px 20px 20px;display:grid;gap:16px}
+.field label{display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:14px;font-weight:600}
+.field label .meta{font-weight:400;flex:1}
+.field textarea{min-height:120px;font-size:14px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:600px){.grid2{grid-template-columns:1fr}}
+
+/* 로그인 */
+.login{min-height:100dvh;display:grid;place-items:center;padding:16px}
+.login form{width:min(360px,100%);padding:28px;display:grid;gap:14px}
+.login h1{font-size:22px;color:#fff}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute"><symbol id="emb" viewBox="-12 -12 24 24"><g id="embG" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"></g></symbol></svg>
+
+<section id="loginView" class="login hidden">
+  <form id="loginForm" class="glass">
+    <div class="brand"><svg width="26" height="26"><use href="#emb"/></svg><div class="wm">GWANG<small>INTERVIEW ROOM</small></div></div>
+    <h1>면접실</h1>
+    <input id="pw" type="password" autocomplete="current-password" placeholder="비밀번호" required>
+    <button class="btn white" type="submit">들어가기</button>
+    <div id="loginErr" class="err hidden"></div>
+  </form>
+</section>
+
+<div id="appView" class="hidden">
+<header>
+  <div class="brand"><svg width="26" height="26"><use href="#emb"/></svg><div class="wm">GWANG<small>INTERVIEW ROOM</small></div></div>
+  <div class="grow"></div>
+  <span id="demoTag" class="chip hidden" title="AI 키가 없어 정해진 질문과 규칙 평가로 돕니다">데모 면접관</span>
+  <select id="companySel" aria-label="회사 선택"></select>
+  <button class="btn ghost sm" id="setupBtn">자료 설정</button>
+  <button class="btn ghost sm" id="logoutBtn">로그아웃</button>
+</header>
+<main class="app">
+  <section class="pane" id="docsPane">
+    <div class="pane-head"><span class="eng">Documents</span></div>
+    <div class="pane-head" style="padding-top:0"><div class="tabs" id="docTabs"></div></div>
+    <div class="pane-body"><div class="doc" id="docBody"></div></div>
+  </section>
+  <section class="pane" id="mainPane">
+    <div class="pane-body"><div class="center" id="main"></div></div>
+  </section>
+  <section class="pane" id="logPane">
+    <div class="pane-head"><span class="eng">Record</span></div>
+    <div class="pane-body" id="log"></div>
+  </section>
+</main>
+</div>
+
+<dialog id="setup">
+  <form method="dialog" id="setupForm">
+    <div class="dlg-head"><h2>자료 설정</h2><button class="btn ghost sm" value="cancel" formnovalidate>닫기</button><button class="btn white sm" id="saveSetup" type="button">저장</button></div>
+    <div class="dlg-body">
+      <div class="grid2">
+        <div class="field"><label for="sName">회사 이름</label><input id="sName" type="text" maxlength="60" placeholder="예: CJ프레시웨이 센터운영"></div>
+        <div class="field"><label for="sCompany">불러올 회사</label><select id="sCompany"></select></div>
+      </div>
+      <div class="grid2">
+        <div class="field"><label for="sVar">변동 질문 수 <span class="meta">고정 2개(자기소개·지원동기)와 별도</span></label>
+          <select id="sVar"><option value="6">6개 (총 8개)</option><option value="7">7개 (총 9개)</option><option value="8">8개 (총 10개)</option></select></div>
+        <div class="field"><label for="sJob">직무 : 인성 비율 <span class="meta num" id="sJobOut"></span></label><input id="sJob" type="range" min="40" max="100" step="10"></div>
+      </div>
+      <div id="docFields"></div>
+      <div id="setupErr" class="err hidden"></div>
+    </div>
+  </form>
+</dialog>
+
+<script>
+"use strict";
+// ---------- 엠블럼 ----------
+(() => {
+  const deg = Math.PI / 180, p = (r, a) => `${(r*Math.cos(a*deg)).toFixed(2)},${(r*Math.sin(a*deg)).toFixed(2)}`;
+  let d = "";
+  for (let k = 0; k < 6; k++) { const a = k*60-90; d += `M${p(10.5,a-30)}L${p(10.5,a+30)}L${p(3.4,a+75)}Z M${p(6.5,a-10)}L${p(10.5,a+30)}`; }
+  document.getElementById("embG").innerHTML = `<path d="${d}"/>`;
+})();
+
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const mmss = (s) => `${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}`;
+const DOCS = [["resume","이력서"],["cover","자소서"],["jd","직무기술서"],["exp","경험 정리"]];
+const store = { get(k, d) { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } }, set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} } };
+
+async function api(action, body = {}) {
+  const res = await fetch("/api/app", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action, ...body }) });
+  const data = await res.json().catch(() => ({ error: "서버 응답을 읽지 못했어요." }));
+  if (res.status === 401 && action !== "login") { showLogin(); throw new Error(data.error); }
+  if (!res.ok) throw new Error(data.error || "요청에 실패했어요.");
+  return data;
+}
+
+// ---------- 상태 ----------
+const S = {
+  companies: [], company: null, rounds: [],
+  round: null,          // 진행 중 회차
+  idx: 0, part: "main", // 지금 질문 번호, 본 질문/꼬리질문
+  view: "home",         // home | loading | interview | evaluating | result
+  viewRound: null,      // 결과로 보는 회차
+  docTab: store.get("ir_docTab", "resume"),
+  tts: store.get("ir_tts", true),
+  err: "",
+};
+
+// ---------- 로그인 ----------
+function showLogin() { $("appView").classList.add("hidden"); $("loginView").classList.remove("hidden"); $("pw").focus(); }
+$("loginForm").onsubmit = async (e) => {
+  e.preventDefault();
+  try { await api("login", { password: $("pw").value }); $("pw").value = ""; boot(); }
+  catch (err) { $("loginErr").textContent = err.message; $("loginErr").classList.remove("hidden"); }
+};
+$("logoutBtn").onclick = async () => { await api("logout").catch(() => {}); showLogin(); };
+
+async function boot() {
+  try {
+    const me = await api("me");
+    $("loginView").classList.add("hidden"); $("appView").classList.remove("hidden");
+    $("demoTag").classList.toggle("hidden", !me.demo);
+    S.companies = (await api("companies")).companies;
+    renderCompanySel();
+    const last = store.get("ir_company", null);
+    const pick = S.companies.find((c) => c.id === last) || S.companies[0];
+    if (pick) await selectCompany(pick.id); else { render(); openSetup(); }
+  } catch { /* showLogin이 이미 처리 */ }
+}
+
+function renderCompanySel() {
+  $("companySel").innerHTML = S.companies.length
+    ? S.companies.map((c) => `<option value="${esc(c.id)}">${esc(c.name)}</option>`).join("")
+    : `<option value="">회사 없음</option>`;
+  if (S.company) $("companySel").value = S.company.id;
+}
+$("companySel").onchange = () => $("companySel").value && selectCompany($("companySel").value);
+
+async function selectCompany(id) {
+  stopAll();
+  const data = await api("getCompany", { id });
+  S.company = data.company; S.rounds = data.rounds; store.set("ir_company", id);
+  S.round = S.rounds.find((r) => r.status === "active") || null;
+  S.view = "home"; S.viewRound = null; S.err = "";
+  if (S.round) resumePosition();
+  renderCompanySel(); render();
+}
+
+// ---------- 자료 설정 ----------
+$("setupBtn").onclick = () => openSetup();
+function openSetup() {
+  const opts = [`<option value="">+ 새 회사</option>`, ...S.companies.map((c) => `<option value="${esc(c.id)}">${esc(c.name)}</option>`)];
+  $("sCompany").innerHTML = opts.join("");
+  $("sCompany").value = S.company?.id || "";
+  fillSetup(S.company);
+  $("setupErr").classList.add("hidden");
+  $("setup").showModal();
+}
+$("sCompany").onchange = async () => {
+  const id = $("sCompany").value;
+  fillSetup(id ? (await api("getCompany", { id })).company : null);
+};
+function fillSetup(c) {
+  $("sName").value = c?.name || "";
+  $("sVar").value = String(c?.settings?.variable ?? 7);
+  $("sJob").value = String(c?.settings?.jobPercent ?? 70);
+  $("sJob").oninput();
+  $("docFields").innerHTML = DOCS.map(([k, label]) => `
+    <div class="field">
+      <label for="d_${k}">${label} <span class="meta" id="c_${k}"></span>
+        <input type="file" accept=".txt,.md,text/plain,text/markdown" id="f_${k}" class="hidden">
+        <button type="button" class="btn ghost sm" onclick="document.getElementById('f_${k}').click()">텍스트 파일 올리기</button></label>
+      <textarea id="d_${k}" placeholder="${label} 내용을 붙여넣으세요${k === "exp" ? " (면접관이 답변의 숫자·기간·역할을 이 자료와 맞춰 봅니다)" : ""}"></textarea>
+    </div>`).join("");
+  for (const [k] of DOCS) {
+    const ta = $(`d_${k}`), count = () => ($(`c_${k}`).textContent = ta.value ? `${ta.value.length.toLocaleString()}자` : "");
+    ta.value = c?.docs?.[k] || ""; count(); ta.oninput = count;
+    $(`f_${k}`).onchange = async (e) => {
+      const files = [...e.target.files];
+      const texts = await Promise.all(files.map((f) => f.text()));
+      ta.value = [ta.value, ...texts].filter((t) => t.trim()).join("\n\n"); count();
+      e.target.value = "";
+    };
+  }
+}
+$("sJob").oninput = () => { const j = Number($("sJob").value); $("sJobOut").textContent = `${j/10} : ${10 - j/10}`; };
+$("saveSetup").onclick = async () => {
+  const btn = $("saveSetup"); btn.disabled = true;
+  try {
+    const docs = Object.fromEntries(DOCS.map(([k]) => [k, $(`d_${k}`).value]));
+    const { company } = await api("saveCompany", { id: $("sCompany").value || undefined, name: $("sName").value, docs, settings: { variable: Number($("sVar").value), jobPercent: Number($("sJob").value) } });
+    S.companies = (await api("companies")).companies;
+    $("setup").close();
+    await selectCompany(company.id);
+  } catch (err) { $("setupErr").textContent = err.message; $("setupErr").classList.remove("hidden"); }
+  finally { btn.disabled = false; }
+};
+
+// ---------- 음성: 읽어 주기 ----------
+let koVoice = null;
+function pickVoice() {
+  const vs = (window.speechSynthesis?.getVoices() || []).filter((v) => v.lang.replace("_", "-").toLowerCase().startsWith("ko"));
+  // 면접관 목소리: 자연스러운(온라인) 남성 음성 → 아무 자연스러운 음성 → 아무 한국어 음성
+  koVoice = vs.find((v) => /InJoon|Hyunsu/i.test(v.name)) || vs.find((v) => /Natural|Online|Google/i.test(v.name)) || vs[0] || null;
+}
+if ("speechSynthesis" in window) { pickVoice(); speechSynthesis.addEventListener("voiceschanged", pickVoice); }
+function speak(text) {
+  if (!("speechSynthesis" in window)) return;
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = "ko-KR"; if (koVoice) u.voice = koVoice;
+  speechSynthesis.speak(u);
+}
+const hush = () => window.speechSynthesis?.cancel();
+
+// ---------- 음성: 받아 적기 (Web Speech API, 크롬·엣지) ----------
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+const REC_ERR = {
+  "not-allowed": "마이크 권한이 꺼져 있어요. 주소창의 마이크 아이콘에서 허용하거나, 글로 적어 주세요.",
+  "service-not-allowed": "이 브라우저에서는 음성 인식을 쓸 수 없어요. 크롬이나 엣지에서 열거나 글로 적어 주세요.",
+  "audio-capture": "마이크를 찾지 못했어요. 연결을 확인하거나 글로 적어 주세요.",
+  network: "음성 인식 서버에 연결하지 못했어요. 인터넷을 확인해 주세요.",
+};
+const rec = { on: false, inst: null, base: "", fin: "", startedAt: 0, acc: 0, tick: null };
+function elapsed() { return rec.acc + (rec.on ? Math.round((Date.now() - rec.startedAt) / 1000) : 0); }
+function startRec() {
+  if (!SR) { S.err = "이 브라우저는 음성 인식을 지원하지 않아요. 크롬이나 엣지에서 열거나, 글로 적어 주세요."; renderErr(); return; }
+  hush();
+  const ta = $("ans");
+  rec.on = true; rec.base = ta.value.trim() ? ta.value.trim() + " " : ""; rec.fin = ""; rec.startedAt = Date.now();
+  spawnRec();
+  rec.tick = setInterval(renderTimer, 250);
+  renderMic();
+}
+function spawnRec() {
+  const r = new SR();
+  r.lang = "ko-KR"; r.continuous = true; r.interimResults = true;
+  r.onresult = (e) => {
+    let fin = "", int = "";
+    for (let i = 0; i < e.results.length; i++) (e.results[i].isFinal ? (fin += e.results[i][0].transcript) : (int += e.results[i][0].transcript));
+    rec.fin = fin;
+    const ta = $("ans"); if (ta) ta.value = rec.base + fin + int;
+  };
+  r.onerror = (e) => {
+    if (REC_ERR[e.error]) { S.err = REC_ERR[e.error]; renderErr(); stopRec(); }
+  };
+  // 크롬은 말이 멈추면 인식을 스스로 끝낸다. 답변 중이면 이어서 다시 켠다.
+  r.onend = () => {
+    rec.base += rec.fin ? rec.fin.trim() + " " : ""; rec.fin = "";
+    const ta = $("ans"); if (ta) ta.value = rec.base.trim();
+    if (rec.on && rec.inst === r) spawnRec();
+  };
+  rec.inst = r;
+  try { r.start(); } catch { S.err = "음성 인식을 시작하지 못했어요. 다시 눌러 주세요."; renderErr(); stopRec(); }
+}
+function stopRec() {
+  if (!rec.on) return;
+  rec.acc = elapsed(); rec.on = false;
+  clearInterval(rec.tick);
+  rec.inst?.stop();
+  renderMic(); renderTimer();
+}
+function resetRec(seconds = 0) { stopRec(); rec.acc = seconds; rec.base = ""; rec.fin = ""; }
+function stopAll() { resetRec(); hush(); }
+
+// ---------- 회차 진행 ----------
+function current() { return S.round?.items[S.idx]; }
+function resumePosition() {
+  const items = S.round.items;
+  const i = items.findIndex((it) => !it.answer.trim() || (it.followUp && !it.followUp.answer.trim()) || it.followUp === null);
+  S.idx = i < 0 ? items.length - 1 : i;
+  const it = items[S.idx];
+  S.part = it.answer.trim() && it.followUp ? "followUp" : "main";
+  S.view = "interview";
+}
+
+async function startRound() {
+  S.view = "loading"; S.err = ""; render();
+  try {
+    S.round = (await api("startRound", { companyId: S.company.id })).round;
+    S.rounds = [...S.rounds.filter((r) => r.id !== S.round.id), S.round];
+    S.idx = 0; S.part = "main"; S.view = "interview"; resetRec();
+    render(); askAloud();
+  } catch (err) { S.view = "home"; S.err = err.message; render(); }
+}
+
+function askAloud() { const it = current(); if (S.tts && it) speak(S.part === "followUp" ? it.followUp.q : it.q); }
+
+async function submitAnswer() {
+  stopRec();
+  const it = current(), answer = $("ans").value.trim();
+  if (!answer) { S.err = "답변이 비어 있어요. 마이크를 누르고 말하거나 글로 적어 주세요."; renderErr(); return; }
+  const btns = document.querySelectorAll("#main button"); btns.forEach((b) => (b.disabled = true));
+  S.err = "";
+  try {
+    const part = S.part;
+    const saved = (await api("saveAnswer", { companyId: S.company.id, roundId: S.round.id, itemId: it.id, part, answer, seconds: rec.acc })).item;
+    Object.assign(it, saved);
+    if (part === "main") {
+      setStatus("면접관이 답변을 듣고 있습니다");
+      const withFollow = (await api("followUp", { companyId: S.company.id, roundId: S.round.id, itemId: it.id })).item;
+      Object.assign(it, withFollow);
+      if (it.followUp) { S.part = "followUp"; resetRec(); render(); askAloud(); return; }
+    }
+    next();
+  } catch (err) { S.err = err.message; render(); }
+}
+
+function next() {
+  resetRec();
+  if (S.idx >= S.round.items.length - 1) return finishRound();
+  S.idx += 1; S.part = "main"; render(); askAloud();
+}
+
+function retryAnswer() { resetRec(); $("ans").value = ""; S.err = ""; renderErr(); }
+
+async function finishRound() {
+  stopAll();
+  S.view = "evaluating"; S.err = ""; render();
+  try {
+    const data = await api("finishRound", { companyId: S.company.id, roundId: S.round.id });
+    S.rounds = data.rounds; S.round = null;
+    S.viewRound = data.round ? data.rounds.find((r) => r.id === data.round.id) : null;
+    S.view = S.viewRound ? "result" : "home";
+    render();
+  } catch (err) { S.view = "interview"; S.err = `평가를 받지 못했어요. 답변은 저장돼 있으니 '끝내기'를 다시 눌러 주세요. (${err.message})`; render(); }
+}
+
+async function toggleRetry(roundId, itemId, value) {
+  try { S.rounds = (await api("setRetry", { companyId: S.company.id, roundId, itemId, retry: value })).rounds; }
+  catch (err) { S.err = err.message; }
+  if (S.viewRound) S.viewRound = S.rounds.find((r) => r.id === S.viewRound.id);
+  render();
+}
+
+// ---------- 그리기 ----------
+function render() { renderDocs(); renderMain(); renderLog(); }
+
+function renderDocs() {
+  $("docTabs").innerHTML = DOCS.slice(0, 3).map(([k, l]) => `<button class="${S.docTab === k ? "on" : ""}" data-k="${k}">${l}</button>`).join("");
+  $("docTabs").querySelectorAll("button").forEach((b) => (b.onclick = () => { S.docTab = b.dataset.k; store.set("ir_docTab", S.docTab); renderDocs(); }));
+  const t = S.company?.docs?.[S.docTab];
+  $("docBody").innerHTML = t?.trim() ? esc(t) : `<p class="meta">아직 넣은 자료가 없어요. 위의 '자료 설정'에서 붙여넣어 주세요.</p>`;
+}
+
+const errBox = () => (S.err ? `<div class="err" id="errBox">${esc(S.err)}</div>` : `<div id="errBox"></div>`);
+function renderErr() { const b = $("errBox"); if (b) b.outerHTML = errBox(); }
+function setStatus(msg) { const s = $("status"); if (s) s.innerHTML = `${esc(msg)}<span class="dots"></span>`; }
+
+function renderMain() {
+  const m = $("main");
+  if (!S.company) { m.innerHTML = `<div class="empty"><h2>회사 자료부터 넣어 주세요</h2><p>이력서·자소서·직무기술서·경험 정리를 붙여넣으면 면접관이 그 자료로 질문합니다.</p><p style="margin-top:16px"><button class="btn white" onclick="openSetup()">자료 설정</button></p></div>`; return; }
+  if (S.view === "loading") { m.innerHTML = `<div class="loading">면접관이 이번 회차 질문을 준비하고 있습니다<span class="dots"></span><p class="meta" style="margin-top:8px">지난 질문과 겹치지 않게 고르는 중이라 20~40초 걸릴 수 있어요.</p></div>`; return; }
+  if (S.view === "evaluating") { m.innerHTML = `<div class="loading">회차 전체를 평가하고 있습니다<span class="dots"></span><p class="meta" style="margin-top:8px">질문별 평가라 30초~1분쯤 걸려요.</p></div>`; return; }
+  if (S.view === "result" && S.viewRound) { m.innerHTML = resultHtml(S.viewRound); bindResult(); return; }
+  if (S.view === "interview" && S.round) { m.innerHTML = interviewHtml(); bindInterview(); return; }
+  // home
+  const done = S.rounds.filter((r) => r.status === "done");
+  const retry = done.flatMap((r) => r.items.filter((it) => it.retry));
+  const s = S.company.settings, job = Math.round(s.variable * s.jobPercent / 100);
+  m.innerHTML = `<div class="empty">
+    <span class="eng">${esc(S.company.name)}</span>
+    <h2 style="margin-top:8px">${done.length + 1}회차 면접</h2>
+    <p>고정 2개(1분 자기소개·지원동기) + 직무 ${job}개 · 인성 ${s.variable - job}개, 총 ${s.variable + 2}개 질문.</p>
+    <p class="meta">${done.length ? `지난 질문 ${done.reduce((n, r) => n + r.items.length, 0)}개와 겹치지 않게 내고, 다시 연습할 질문 ${retry.length}개 중 일부는 표현을 바꿔 다시 냅니다.` : "답변 중에는 평가하지 않고, 끝내기를 누르면 한 번에 평가합니다."}</p>
+    <p style="margin-top:20px"><button class="btn white" id="startBtn">${done.length + 1}회차 시작</button></p>
+    ${errBox()}</div>`;
+  $("startBtn").onclick = startRound;
+}
+
+function interviewHtml() {
+  const it = current(), total = S.round.items.length, fu = S.part === "followUp";
+  const answered = S.round.items.filter((x) => x.answer.trim()).length;
+  return `
+    <div class="progress"><span class="eng num">Q ${S.idx + 1} / ${total}</span><div class="bar"><i style="width:${(answered / total) * 100}%"></i></div>
+      <button class="btn ghost sm" id="finishBtn" title="지금까지 답한 질문만 평가합니다">끝내기</button></div>
+    <div class="bubble">
+      <div class="avatar"><svg width="18" height="18"><use href="#emb"/></svg></div>
+      <div class="say glass"><span class="eng">${esc(it.type)}${it.rephraseOf ? " · 다시 묻는 질문" : ""}</span>${esc(it.q)}
+        ${fu ? "" : sayActions(it.q)}</div>
+    </div>
+    ${fu ? `<div class="bubble"><div class="avatar"><svg width="18" height="18"><use href="#emb"/></svg></div><div class="say glass"><span class="eng">꼬리질문</span>${esc(it.followUp.q)}${sayActions(it.followUp.q)}</div></div>` : ""}
+    <div class="answer glass">
+      <div class="mic-row">
+        <button class="mic" id="micBtn" aria-label="답변 시작"></button>
+        <div><div class="timer num" id="timer">0:00</div><div class="meta" id="micHint"></div></div>
+      </div>
+      <textarea id="ans" placeholder="마이크를 누르고 말하면 여기에 적힙니다. 글로 고쳐도 됩니다.">${esc(fu ? it.followUp.answer : it.answer)}</textarea>
+      <div class="row end" style="margin-top:12px">
+        <span class="meta" id="status" style="margin-right:auto"></span>
+        <button class="btn ghost" id="retryBtn">다시 답하기</button>
+        <button class="btn white" id="submitBtn">${S.idx === total - 1 ? "제출하고 끝내기" : "제출하고 다음"}</button>
+      </div>
+      ${errBox()}
+    </div>`;
+}
+function sayActions(text) {
+  return `<div class="say-actions"><button class="btn ghost sm" data-say="${esc(text)}">다시 듣기</button><button class="btn ghost sm" data-tts>${S.tts ? "읽어 주기 켬" : "읽어 주기 끔"}</button></div>`;
+}
+function bindInterview() {
+  const it = current();
+  $("micBtn").onclick = () => (rec.on ? stopRec() : startRec());
+  $("submitBtn").onclick = submitAnswer;
+  $("retryBtn").onclick = retryAnswer;
+  $("finishBtn").onclick = () => { if (confirm("지금까지 답한 질문만 평가하고 이 회차를 끝낼까요?")) finishRound(); };
+  document.querySelectorAll("[data-say]").forEach((b) => (b.onclick = () => speak(b.dataset.say)));
+  document.querySelectorAll("[data-tts]").forEach((b) => (b.onclick = () => { S.tts = !S.tts; store.set("ir_tts", S.tts); if (!S.tts) hush(); renderMain(); }));
+  if (!rec.on && !rec.acc) rec.acc = S.part === "followUp" ? it.followUp.seconds : it.seconds;
+  renderMic(); renderTimer();
+}
+const MIC = `<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>`;
+const STOP = `<svg width="22" height="22" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2" fill="currentColor"/></svg>`;
+function renderMic() {
+  const b = $("micBtn"); if (!b) return;
+  b.classList.toggle("on", rec.on); b.innerHTML = rec.on ? STOP : MIC;
+  b.setAttribute("aria-label", rec.on ? "답변 멈추기" : "답변 시작");
+  $("micHint").textContent = rec.on ? "듣고 있습니다 · 다 말하면 멈춤" : SR ? "마이크를 눌러 답변 시작" : "음성 인식 미지원 · 글로 적어 주세요";
+}
+function renderTimer() {
+  const t = $("timer"); if (!t) return;
+  const s = elapsed(), it = current(), limit = it?.type === "자기소개" ? 70 : 90;
+  t.textContent = mmss(s); t.classList.toggle("over", s > limit);
+  t.title = s > limit ? `${limit}초가 넘었습니다` : "";
+}
+
+function resultHtml(r) {
+  const prev = S.rounds.filter((x) => x.status === "done" && x.no < r.no).at(-1);
+  return `
+    <div class="row" style="margin:6px 0 14px"><span class="eng">${r.no}회차 평가 · ${new Date(r.date).toLocaleDateString("ko-KR")}</span><span style="flex:1"></span><button class="btn ghost sm" id="homeBtn">처음 화면</button></div>
+    <div class="glass" style="padding:16px;margin-bottom:14px">
+      <p style="color:#fff">${esc(r.summary)}</p>
+      <div class="stats" style="margin-top:10px">${statsHtml(r, prev)}</div>
+    </div>
+    ${r.items.map((it) => evHtml(r, it)).join("")}
+    ${errBox()}`;
+}
+function evHtml(r, it) {
+  const e = it.evaluation, secs = it.seconds + (it.followUp?.seconds || 0);
+  if (!e) return "";
+  return `<article class="ev glass">
+    <div class="row"><span class="chip">${esc(it.type)}</span><span class="chip num">${mmss(secs)} · ${esc(e.time)}</span><span class="chip">${esc(e.fit)}</span>
+      <span style="flex:1"></span><button class="chip ${it.retry ? "on" : ""}" data-retry="${it.id}" data-v="${it.retry ? "" : "1"}" title="다시 연습할 질문 목록에 넣고 빼기">${it.retry ? "다시 연습 ✓" : "다시 연습"}</button></div>
+    <h3>${esc(it.q)}</h3>
+    <dl>
+      <dt>질문에 맞게</dt><dd>${esc(e.fit_note)}</dd>
+      <dt>결론 먼저</dt><dd>${e.conclusion_first ? "예" : "아니오"} · ${esc(e.conclusion_note)}</dd>
+      <dt>답변 시간</dt><dd>${esc(e.time_note)}</dd>
+      ${e.stuck_points.length ? `<dt>막힌 곳</dt><dd><ul class="plain">${e.stuck_points.map((s) => `<li>${esc(s)}</li>`).join("")}</ul></dd>` : ""}
+      ${e.fact_issues.length ? `<dt>자료와 다름</dt><dd><ul class="plain">${e.fact_issues.map((f) => `<li>"${esc(f.said)}" ↔ 자료: ${esc(f.source)}<br><span class="meta">${esc(f.note)}</span></li>`).join("")}</ul></dd>` : ""}
+    </dl>
+    <div class="tip">${esc(e.tip)}</div>
+    <details><summary>내 답변 보기</summary><p style="margin-top:6px;white-space:pre-wrap">${esc(it.answer)}</p>
+      ${it.followUp?.answer ? `<p class="meta" style="margin-top:8px">꼬리질문: ${esc(it.followUp.q)}</p><p style="white-space:pre-wrap">${esc(it.followUp.answer)}</p>` : ""}</details>
+  </article>`;
+}
+function bindResult() {
+  $("homeBtn").onclick = () => { S.view = "home"; S.viewRound = null; S.err = ""; render(); };
+  document.querySelectorAll("[data-retry]").forEach((b) => (b.onclick = () => toggleRetry(S.viewRound.id, b.dataset.retry, Boolean(b.dataset.v))));
+}
+
+function statsHtml(r, prev) {
+  const s = r.stats, p = prev?.stats;
+  const d = (a, b, unit = "") => (p && b != null && a != null && a !== b ? ` <span class="delta">${a > b ? "▲" : "▼"}${Math.abs(a - b)}${unit}</span>` : "");
+  return `<span>답변 ${s.answered}개</span><span>평균 ${s.avgSeconds}초${d(s.avgSeconds, p?.avgSeconds, "초")}</span><span>다시 연습 ${s.retry}개${d(s.retry, p?.retry)}</span>${s.conclusionFirst != null ? `<span>결론 먼저 ${s.conclusionFirst}%${d(s.conclusionFirst, p?.conclusionFirst, "%p")}</span>` : ""}`;
+}
+
+function renderLog() {
+  const L = $("log");
+  if (!S.company) { L.innerHTML = `<p class="meta">기록이 없어요.</p>`; return; }
+  const done = S.rounds.filter((r) => r.status === "done");
+  const shown = S.round || S.viewRound || done.at(-1);
+  const retry = done.flatMap((r) => r.items.filter((it) => it.retry).map((it) => ({ r, it })));
+  // 자주 막힌 유형: 모든 회차에서 '다시 연습'이 붙었거나 평가가 '부족'인 질문 수
+  const types = {};
+  for (const r of done) for (const it of r.items) if (it.retry || it.evaluation?.fit === "부족") types[it.type] = (types[it.type] || 0) + 1;
+  const tmax = Math.max(1, ...Object.values(types));
+  L.innerHTML = `
+    <div class="sec"><h4 class="eng">${shown ? `${shown.no}회차 질문${shown.status === "active" ? " · 진행 중" : ""}` : "이번 회차 질문"}</h4>
+      ${shown ? `<ol class="qlist">${shown.items.filter((it, i) => shown.status === "done" || i <= S.idx).map((it, i) => `<li class="${shown === S.round && i === S.idx && S.view === "interview" ? "cur" : it.answer.trim() ? "done" : ""}"><span class="n">${String(i + 1).padStart(2, "0")}</span><span class="q">${esc(it.q)}</span>${it.retry ? `<span class="chip">다시</span>` : ""}</li>`).join("")}</ol>${shown.status === "active" ? `<p class="meta" style="margin-top:6px">남은 질문 ${shown.items.length - S.idx - 1}개는 미리 보이지 않습니다.</p>` : ""}` : `<p class="meta">회차를 시작하면 질문 목록이 여기에 쌓입니다.</p>`}</div>
+    <div class="sec"><h4 class="eng">다시 연습할 질문 · ${retry.length}</h4>
+      ${retry.length ? `<ol class="qlist">${retry.map(({ r, it }) => `<li><span class="n">${r.no}회</span><span class="q">${esc(it.q)}</span><button class="chip" data-unretry="${r.id}|${it.id}" title="목록에서 빼기">빼기</button></li>`).join("")}</ol>` : `<p class="meta">막힌 질문이 생기면 여기에 모입니다. 다음 회차에 표현을 바꿔 다시 나옵니다.</p>`}</div>
+    <div class="sec"><h4 class="eng">자주 막힌 질문 유형</h4>
+      ${Object.keys(types).length ? Object.entries(types).sort((a, b) => b[1] - a[1]).map(([t, n]) => `<div class="typebar"><span>${esc(t)}</span><div class="bar"><i style="width:${(n / tmax) * 100}%"></i></div><span class="num">${n}</span></div>`).join("") : `<p class="meta">아직 없어요.</p>`}</div>
+    <div class="sec"><h4 class="eng">지난 회차</h4>
+      ${done.length ? done.slice().reverse().map((r) => { const prev = done.filter((x) => x.no < r.no).at(-1); return `<button class="round glass" data-round="${r.id}"><b>${r.no}회차</b> <span class="meta">${new Date(r.date).toLocaleDateString("ko-KR")}</span><div class="stats">${statsHtml(r, prev)}</div><div class="meta" style="margin-top:4px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${esc(r.summary)}</div></button>`; }).join("") : `<p class="meta">끝낸 회차가 여기에 1회차, 2회차 순으로 쌓입니다.</p>`}</div>`;
+  L.querySelectorAll("[data-round]").forEach((b) => (b.onclick = () => { if (S.view === "interview" || S.view === "loading" || S.view === "evaluating") return; S.viewRound = S.rounds.find((r) => r.id === b.dataset.round); S.view = "result"; S.err = ""; render(); }));
+  L.querySelectorAll("[data-unretry]").forEach((b) => (b.onclick = () => { const [rid, iid] = b.dataset.unretry.split("|"); toggleRetry(rid, iid, false); }));
+}
+
+boot();
+</script>
+</body>
+</html>
