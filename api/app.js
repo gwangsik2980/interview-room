@@ -44,7 +44,7 @@ const withStats = (rounds) => rounds.map((r) => ({ ...r, stats: roundStats(r) })
 const text = (v, max) => String(v ?? "").slice(0, max);
 const seconds = (v) => Math.min(3600, Math.max(0, Math.round(Number(v) || 0)));
 
-const actions = {
+export const actions = {
   async me() {
     return { ok: true, demo: ai.demo };
   },
