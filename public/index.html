@@ -62,17 +62,15 @@ header select{width:auto;max-width:220px;padding:6px 10px;font-size:14px}
 .pane-body{flex:1;min-height:0;overflow-y:auto;padding:4px 18px 18px}
 @media (max-width:900px){
   .app{grid-template-columns:1fr;height:auto;min-height:calc(100dvh - 58px)}
-  #docsPane,#logPane{display:none}
+  #listPane,#logPane{display:none}
   #mainPane .pane-body{overflow:visible}
   header{flex-wrap:wrap;height:auto;padding:10px 16px}
   .pane-body{padding:4px 16px 16px}
 }
 
-/* 자료 */
-.tabs{display:flex;gap:6px;flex-wrap:wrap}
-.tabs button{padding:5px 12px;font-size:13px;border:1px solid var(--line-hi);border-radius:var(--r-sm);color:var(--sub)}
-.tabs button.on{background:var(--white);color:var(--ink);border-color:var(--white);font-weight:600}
-.doc{white-space:pre-wrap;font-size:14px;color:#d0d0cc;line-height:1.75}
+/* 면접 목록 */
+.round.on{border-color:var(--white)}
+.round.on b::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--white);margin-right:8px;vertical-align:2px}
 
 /* 면접 */
 .center{max-width:720px;width:100%;margin:0 auto}
@@ -206,10 +204,9 @@ dialog::backdrop{background:rgba(0,0,0,.6)}
   <button class="btn ghost sm" id="logoutBtn">로그아웃</button>
 </header>
 <main class="app">
-  <section class="pane" id="docsPane">
-    <div class="pane-head"><span class="eng">자료</span></div>
-    <div class="pane-head" style="padding-top:0"><div class="tabs" id="docTabs"></div></div>
-    <div class="pane-body"><div class="doc" id="docBody"></div></div>
+  <section class="pane" id="listPane">
+    <div class="pane-head"><span class="eng">면접 목록</span></div>
+    <div class="pane-body" id="ilist"></div>
   </section>
   <section class="pane" id="mainPane">
     <div class="pane-body"><div class="center" id="main"></div></div>
@@ -271,7 +268,6 @@ const S = {
   idx: 0, part: "main", // 지금 질문 번호, 본 질문/꼬리질문
   view: "home",         // home | loading | interview | evaluating | result
   viewRound: null,      // 결과로 보는 회차
-  docTab: store.get("ir_docTab", "resume"),
   tts: store.get("ir_tts", true),
   err: "",
 };
@@ -318,11 +314,11 @@ async function selectCompany(id) {
 
 // ---------- 자료 설정 ----------
 $("setupBtn").onclick = () => openSetup();
-function openSetup() {
+function openSetup(fresh) {
   const opts = [`<option value="">+ 새 회사</option>`, ...S.companies.map((c) => `<option value="${esc(c.id)}">${esc(c.name)}</option>`)];
   $("sCompany").innerHTML = opts.join("");
-  $("sCompany").value = S.company?.id || "";
-  fillSetup(S.company);
+  $("sCompany").value = fresh ? "" : S.company?.id || "";
+  fillSetup(fresh ? null : S.company);
   $("setupErr").classList.add("hidden");
   $("setup").showModal();
 }
@@ -504,13 +500,18 @@ async function toggleRetry(roundId, itemId, value) {
 }
 
 // ---------- 그리기 ----------
-function render() { renderDocs(); renderMain(); renderLog(); }
+function render() { renderList(); renderMain(); renderLog(); }
 
-function renderDocs() {
-  $("docTabs").innerHTML = DOCS.slice(0, 3).map(([k, l]) => `<button class="${S.docTab === k ? "on" : ""}" data-k="${k}">${l}</button>`).join("");
-  $("docTabs").querySelectorAll("button").forEach((b) => (b.onclick = () => { S.docTab = b.dataset.k; store.set("ir_docTab", S.docTab); renderDocs(); }));
-  const t = S.company?.docs?.[S.docTab];
-  $("docBody").innerHTML = t?.trim() ? esc(t) : `<p class="meta">아직 넣은 자료가 없어요. 위의 '자료 설정'에서 붙여넣어 주세요.</p>`;
+// 왼쪽 면접 목록: 회사마다 한 줄 '<회사> <직무> 직무 면접'. 회차 수는 고른 면접만 앎(목록 API엔 이름만 있음)
+const interviewName = (n) => (/면접$/.test(n) ? n : `${n} 직무 면접`);
+function renderList() {
+  const done = S.rounds.filter((r) => r.status === "done").length;
+  $("ilist").innerHTML = S.companies.map((c) => {
+    const on = c.id === S.company?.id;
+    return `<button class="round glass${on ? " on" : ""}" data-co="${esc(c.id)}"${on ? ' aria-current="true"' : ""}><b>${esc(interviewName(c.name))}</b>${on ? `<div class="meta" style="margin-top:2px">${done ? `${done}회차 연습` : "아직 연습 전"}</div>` : ""}</button>`;
+  }).join("") + `<button class="btn ghost sm" id="newInterview" style="margin-top:4px">+ 새 면접</button>`;
+  $("ilist").querySelectorAll("[data-co]").forEach((b) => (b.onclick = () => b.dataset.co !== S.company?.id && selectCompany(b.dataset.co)));
+  $("newInterview").onclick = () => openSetup(true);
 }
 
 const errBox = () => (S.err ? `<div class="err" id="errBox">${esc(S.err)}</div>` : `<div id="errBox"></div>`);
