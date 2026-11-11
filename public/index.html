@@ -389,10 +389,12 @@ const REC_ERR = {
 };
 const rec = { on: false, inst: null, base: "", fin: "", startedAt: 0, acc: 0, tick: null };
 function elapsed() { return rec.acc + (rec.on ? Math.round((Date.now() - rec.startedAt) / 1000) : 0); }
+// 아이폰은 브라우저 받아 적기가 안 되므로 키보드 마이크(받아쓰기)로 적고, 앱 마이크는 시간만 잰다.
+const KB = !SR || /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
 function startRec() {
-  if (!SR) { S.err = "이 브라우저는 음성 인식을 지원하지 않아요. 크롬이나 엣지에서 열거나, 글로 적어 주세요."; renderErr(); return; }
   hush();
   const ta = $("ans");
+  if (KB) { rec.on = true; rec.startedAt = Date.now(); rec.tick = setInterval(renderTimer, 250); renderMic(); ta?.focus(); return; }
   rec.on = true; rec.base = ta.value.trim() ? ta.value.trim() + " " : ""; rec.fin = ""; rec.startedAt = Date.now();
   spawnRec();
   rec.tick = setInterval(renderTimer, 250);
@@ -590,6 +592,7 @@ function sayActions(text) {
 function bindInterview() {
   const it = current();
   $("micBtn").onclick = () => (rec.on ? stopRec() : startRec());
+  $("ans").oninput = () => { if (KB && !rec.on) startRec(); };
   $("submitBtn").onclick = submitAnswer;
   $("retryBtn").onclick = retryAnswer;
   $("finishBtn").onclick = () => { if (confirm("지금까지 답한 질문만 평가하고 이 회차를 끝낼까요?")) finishRound(); };
@@ -605,7 +608,9 @@ function renderMic() {
   const b = $("micBtn"); if (!b) return;
   b.classList.toggle("on", rec.on); b.innerHTML = rec.on ? STOP : MIC;
   b.setAttribute("aria-label", rec.on ? "답변 멈추기" : "답변 시작");
-  $("micHint").textContent = rec.on ? "듣고 있습니다 · 다 말하면 멈춤" : SR ? "마이크를 눌러 답변 시작" : "음성 인식 미지원 · 글로 적어 주세요";
+  $("micHint").textContent = KB
+    ? (rec.on ? "시간 재는 중 · 키보드 오른쪽 아래 마이크로 말하세요" : "마이크를 누르고 키보드 마이크로 말하세요")
+    : rec.on ? "듣고 있습니다 · 다 말하면 멈춤" : "마이크를 눌러 답변 시작";
 }
 function renderTimer() {
   const t = $("timer"); if (!t) return;
