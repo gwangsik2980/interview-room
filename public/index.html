@@ -536,9 +536,9 @@ function renderMain() {
     <h2 style="margin-top:8px">${done.length + 1}회차 면접</h2>
     <p>고정 2개(1분 자기소개·지원동기) + 직무 ${job}개 · 인성 ${s.variable - job}개, 총 ${s.variable + 2}개 질문.</p>
     <p class="meta">${done.length ? `지난 질문 ${done.reduce((n, r) => n + r.items.length, 0)}개와 겹치지 않게 내고, 다시 연습할 질문 ${retry.length}개 중 일부는 표현을 바꿔 다시 냅니다.` : "답변 중에는 평가하지 않고, 끝내기를 누르면 한 번에 평가합니다."}</p>
-    <p style="margin-top:20px"><button class="btn white" id="startBtn">${done.length + 1}회차 시작</button></p>
+    <p style="margin-top:20px"><button class="btn white" id="startBtn">${done.length + 1}회차 ${S.round ? "이어하기" : "시작"}</button></p>
     ${errBox()}</div>`;
-  $("startBtn").onclick = startRound;
+  $("startBtn").onclick = S.round ? () => { resumePosition(); render(); askAloud(); } : startRound;
 }
 
 const AVATAR = `<span class="av"><svg width="18" height="18"><use href="#emb"/></svg></span>`;
@@ -570,6 +570,7 @@ function interviewHtml() {
   seen.count = n;
   return `
     <div class="progress"><span class="eng num">Q ${S.idx + 1} / ${total}</span><div class="bar"><i style="width:${(answered / total) * 100}%"></i></div>
+      <button class="btn ghost sm" id="leaveBtn" title="회차는 그대로 두고 처음 화면으로">나가기</button>
       <button class="btn ghost sm" id="finishBtn" title="지금까지 답한 질문만 평가합니다">끝내기</button></div>
     <div class="thread">${thread}</div>
     <div class="dock">
@@ -595,6 +596,10 @@ function bindInterview() {
   $("ans").oninput = () => { if (KB && !rec.on) startRec(); };
   $("submitBtn").onclick = submitAnswer;
   $("retryBtn").onclick = retryAnswer;
+  $("leaveBtn").onclick = () => {
+    if ($("ans").value.trim() && !confirm("제출하지 않은 답은 저장되지 않아요. 나갈까요?")) return;
+    stopAll(); S.view = "home"; S.err = ""; render();
+  };
   $("finishBtn").onclick = () => { if (confirm("지금까지 답한 질문만 평가하고 이 회차를 끝낼까요?")) finishRound(); };
   document.querySelectorAll("[data-say]").forEach((b) => (b.onclick = () => speak(b.dataset.say)));
   document.querySelectorAll("[data-tts]").forEach((b) => (b.onclick = () => { S.tts = !S.tts; store.set("ir_tts", S.tts); if (!S.tts) hush(); renderMain(); }));
